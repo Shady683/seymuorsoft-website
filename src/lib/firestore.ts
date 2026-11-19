@@ -13,16 +13,25 @@ function getName(name: unknown): string {
 
 export async function fetchGiftXProducts(): Promise<Product[]> {
   try {
-    const [catSnap, giftCatSnap, snap1, snap2] = await Promise.all([
+    const results = await Promise.allSettled([
       getDocs(collection(giftxDb, "categories")),
       getDocs(collection(giftxDb, "gift_categories")),
       getDocs(collection(giftxDb, "products")),
       getDocs(collection(giftxDb, "gift_products")),
     ]);
+    results.forEach((r, i) => {
+      if (r.status === "rejected") console.error(`giftx collection[${i}] error:`, r.reason);
+    });
+    const catSnap    = results[0].status === "fulfilled" ? results[0].value : null;
+    const giftCatSnap= results[1].status === "fulfilled" ? results[1].value : null;
+    const snap1      = results[2].status === "fulfilled" ? results[2].value : null;
+    const snap2      = results[3].status === "fulfilled" ? results[3].value : null;
+    console.log(`giftx docs: products=${snap1?.docs.length ?? "err"}, gift_products=${snap2?.docs.length ?? "err"}`);
     const catMap: Record<string, string> = {};
-    catSnap.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
-    giftCatSnap.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
-    return [...snap1.docs, ...snap2.docs]
+    catSnap?.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
+    giftCatSnap?.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
+    const allDocs = [...(snap1?.docs ?? []), ...(snap2?.docs ?? [])];
+    return allDocs
       .filter(d => {
         const s = d.data().status;
         const a = d.data().isActive;
@@ -42,7 +51,10 @@ export async function fetchGiftXProducts(): Promise<Product[]> {
         };
       })
       .filter(p => p.name);
-  } catch { return []; }
+  } catch (e) {
+    console.error("fetchGiftXProducts error:", e);
+    return [];
+  }
 }
 
 export async function fetchGiftXCategories(): Promise<string[]> {
@@ -84,7 +96,10 @@ export async function fetchKarellaProducts(): Promise<Product[]> {
         };
       })
       .filter(p => p.name);
-  } catch { return []; }
+  } catch (e) {
+    console.error("fetchKarellaProducts error:", e);
+    return [];
+  }
 }
 
 export async function fetchKarellaCategories(): Promise<string[]> {
