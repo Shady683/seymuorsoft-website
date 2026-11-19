@@ -13,8 +13,11 @@ function getName(name: unknown): string {
 
 export async function fetchGiftXProducts(): Promise<Product[]> {
   try {
-    const snap = await getDocs(collection(giftxDb, "gift_products"));
-    return snap.docs
+    const [snap1, snap2] = await Promise.all([
+      getDocs(collection(giftxDb, "products")),
+      getDocs(collection(giftxDb, "gift_products")),
+    ]);
+    return [...snap1.docs, ...snap2.docs]
       .filter(d => d.data().isActive !== false)
       .map(d => {
         const data = d.data();
@@ -22,13 +25,14 @@ export async function fetchGiftXProducts(): Promise<Product[]> {
           id: d.id,
           name: getName(data.name),
           price: data.price || 0,
-          category: getName(data.category) || "الكل",
+          category: getName(data.category) || getName(data.categoryName) || "الكل",
           emoji: data.emoji || "🎁",
           imageUrl: data.imageUrl || null,
           badge: data.badge,
           badgeColor: data.badgeColor,
         };
-      });
+      })
+      .filter(p => p.name);
   } catch { return []; }
 }
 
