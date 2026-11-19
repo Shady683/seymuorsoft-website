@@ -1,5 +1,4 @@
-// ── Project Wizard ─────────────────────────────────────────
-export type ProjectType = "mobile" | "web" | "desktop" | "ecommerce" | "";
+﻿export type ProjectType = "mobile" | "web" | "desktop" | "ecommerce" | "";
 export type PlatformType = "android" | "ios" | "both" | "windows" | "web" | "";
 export type TimelineType = "asap" | "1month" | "3months" | "flexible" | "";
 
@@ -14,18 +13,17 @@ export interface WizardState {
   notes: string;
 }
 
-// ── Store / Product ────────────────────────────────────────
 export interface Product {
   id: string;
   name: string;
   price: number;
   category: string;
   emoji: string;
+  imageUrl?: string | null;
   badge?: string;
   badgeColor?: string;
 }
 
-// ── Dashboard ──────────────────────────────────────────────
 export type DashboardNav = "overview" | "products" | "orders" | "settings";
 
 export interface StatCard {
@@ -41,7 +39,7 @@ export interface Order {
   name: string;
   items: number;
   amount: number;
-  status: "جديد" | "قيد التجهيز" | "تم التوصيل" | "ملغي";
+  status: string;
   date: string;
   cat: string;
 }

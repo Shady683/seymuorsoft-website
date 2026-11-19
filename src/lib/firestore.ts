@@ -1,0 +1,80 @@
+﻿import { collection, getDocs } from "firebase/firestore";
+import { giftxDb, karellaDb } from "./firebase";
+import type { Product } from "./types";
+
+function getName(name: unknown): string {
+  if (typeof name === "string") return name;
+  if (typeof name === "object" && name !== null) {
+    const n = name as Record<string, string>;
+    return n.ar || n.en || "";
+  }
+  return "";
+}
+
+export async function fetchGiftXProducts(): Promise<Product[]> {
+  try {
+    const snap = await getDocs(collection(giftxDb, "gift_products"));
+    return snap.docs
+      .filter(d => d.data().isActive !== false)
+      .map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: getName(data.name),
+          price: data.price || 0,
+          category: getName(data.category) || "الكل",
+          emoji: data.emoji || "🎁",
+          imageUrl: data.imageUrl || null,
+          badge: data.badge,
+          badgeColor: data.badgeColor,
+        };
+      });
+  } catch { return []; }
+}
+
+export async function fetchGiftXCategories(): Promise<string[]> {
+  try {
+    const snap = await getDocs(collection(giftxDb, "gift_categories"));
+    const names = snap.docs
+      .filter(d => d.data().isActive !== false)
+      .sort((a, b) => (a.data().order || 0) - (b.data().order || 0))
+      .map(d => getName(d.data().name))
+      .filter(Boolean);
+    return ["الكل", ...names];
+  } catch { return ["الكل"]; }
+}
+
+export async function fetchKarellaProducts(): Promise<Product[]> {
+  try {
+    const catSnap = await getDocs(collection(karellaDb, "categories"));
+    const catMap: Record<string, string> = {};
+    catSnap.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
+
+    const snap = await getDocs(collection(karellaDb, "products"));
+    return snap.docs
+      .filter(d => d.data().isActive !== false)
+      .map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: getName(data.name),
+          price: data.price || 0,
+          category: catMap[data.categoryId] || "الكل",
+          emoji: "👗",
+          imageUrl: data.imageUrl || null,
+        };
+      });
+  } catch { return []; }
+}
+
+export async function fetchKarellaCategories(): Promise<string[]> {
+  try {
+    const snap = await getDocs(collection(karellaDb, "categories"));
+    const names = snap.docs
+      .filter(d => d.data().isActive !== false)
+      .sort((a, b) => (a.data().order || 0) - (b.data().order || 0))
+      .map(d => getName(d.data().name))
+      .filter(Boolean);
+    return ["الكل", ...names];
+  } catch { return ["الكل"]; }
+}
