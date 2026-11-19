@@ -25,7 +25,7 @@ export default function ContactSection() {
               ابدأ ويزارد المشروع ←
             </Link>
             <a
-              href="https://wa.me/201XXXXXXXXX"
+              href="https://wa.me/201277980805"
               target="_blank"
               rel="noopener noreferrer"
               className="border-2 border-white/40 text-white px-7 py-3.5 rounded-2xl font-700 text-base hover:bg-white/10 transition-all"
@@ -35,7 +35,7 @@ export default function ContactSection() {
           </div>
 
           <p className="text-white/50 text-sm mt-6">
-            أو راسلنا على: <span className="text-white/80">seymosoft@gmail.com</span>
+            أو راسلنا على: <span className="text-white/80">seymoursoftsolution@gmail.com</span>
           </p>
         </div>
       </div>
