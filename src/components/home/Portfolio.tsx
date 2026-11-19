@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 const projects = [
   {
@@ -10,6 +10,7 @@ const projects = [
     color: "#F97316",
     bg: "#FFF7ED",
     storeUrl: "/stores/giftx",
+    wip: false,
   },
   {
     emoji: "👗",
@@ -20,6 +21,7 @@ const projects = [
     color: "#8B5CF6",
     bg: "#F5F3FF",
     storeUrl: "/stores/karella",
+    wip: false,
   },
   {
     emoji: "🚌",
@@ -30,6 +32,7 @@ const projects = [
     color: "#10B981",
     bg: "#ECFDF5",
     storeUrl: null,
+    wip: true,
   },
   {
     emoji: "🎮",
@@ -40,6 +43,7 @@ const projects = [
     color: "#F59E0B",
     bg: "#FFFBEB",
     storeUrl: null,
+    wip: false,
   },
 ];
 
@@ -72,14 +76,21 @@ export default function Portfolio() {
                 >
                   {p.emoji}
                 </div>
-                {p.storeUrl && (
-                  <Link
-                    href={p.storeUrl}
-                    className="text-xs font-700 px-3 py-1.5 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
-                  >
-                    شوف المتجر →
-                  </Link>
-                )}
+                <div className="flex items-center gap-2">
+                  {p.storeUrl && (
+                    <Link
+                      href={p.storeUrl}
+                      className="text-xs font-700 px-3 py-1.5 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                    >
+                      شوف المتجر ←
+                    </Link>
+                  )}
+                  {p.wip && (
+                    <span className="text-xs font-700 px-3 py-1.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      🔧 تحت التنفيذ
+                    </span>
+                  )}
+                </div>
               </div>
               <div
                 className="text-xs font-700 px-2.5 py-1 rounded-full inline-block mb-2"
