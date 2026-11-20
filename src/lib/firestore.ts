@@ -1,6 +1,17 @@
-import { getDocs, collection, doc, getDoc } from "firebase/firestore";
-import type { Firestore } from "firebase/firestore";
-import type { Product } from "./types";
+import {
+  getDocs,
+  collection,
+  doc,
+  getDoc,
+  updateDoc,
+  query,
+  orderBy,
+  limit,
+  Timestamp,
+  onSnapshot,
+} from "firebase/firestore";
+import type { Firestore, Unsubscribe } from "firebase/firestore";
+import type { Product, FirestoreOrder, OrderStatus, PaymentStatus } from "./types";
 import type { StoreConfig, StoreSection } from "./stores.config";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -160,6 +171,164 @@ export async function fetchStoreData(store: StoreConfig): Promise<{
   ]);
 
   return { settings, sections: sectionResults as SectionData[] };
+}
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+
+function mapTimestamp(val: unknown): Date | undefined {
+  if (!val) return undefined;
+  if (val instanceof Timestamp) return val.toDate();
+  if (val instanceof Date) return val;
+  if (typeof val === "object" && val !== null && "seconds" in val) {
+    return new Timestamp((val as { seconds: number }).seconds, 0).toDate();
+  }
+  return undefined;
+}
+
+function mapOrder(d: { id: string; data(): Record<string, unknown> }): FirestoreOrder {
+  const data = d.data();
+
+  // Map items array
+  const rawItems = Array.isArray(data.items) ? data.items : [];
+  const items = rawItems.map((item: Record<string, unknown>) => ({
+    productId: (item.productId || item.id || "") as string,
+    name: getName(item.name),
+    price: (item.price || item.offerPrice || 0) as number,
+    quantity: (item.quantity || item.qty || 1) as number,
+    imageUrl: (item.imageUrl || (Array.isArray(item.imageUrls) ? item.imageUrls[0] : undefined) || undefined) as string | undefined,
+  }));
+
+  // Map delivery address
+  const rawAddr = (data.deliveryAddress || data.address) as Record<string, unknown> | undefined;
+  const deliveryAddress = rawAddr ? {
+    street: rawAddr.street as string | undefined,
+    area: rawAddr.area as string | undefined,
+    city: rawAddr.city as string | undefined,
+    notes: rawAddr.notes as string | undefined,
+  } : undefined;
+
+  // Map payment receipt
+  const rawReceipt = (data.paymentReceipt || data.receipt) as Record<string, unknown> | undefined;
+  const paymentReceipt = rawReceipt ? {
+    imageUrl: rawReceipt.imageUrl as string | undefined,
+    uploadedAt: mapTimestamp(rawReceipt.uploadedAt),
+    transactionId: rawReceipt.transactionId as string | undefined,
+  } : undefined;
+
+  return {
+    id: d.id,
+    orderNumber: (data.orderNumber || data.orderNo) as string | undefined,
+    userId: (data.userId || data.customerId || "") as string,
+    customerName: (data.customerName || data.name || data.userName) as string | undefined,
+    customerPhone: (data.customerPhone || data.phone || data.mobile) as string | undefined,
+    customerEmail: (data.customerEmail || data.email) as string | undefined,
+    items,
+    totalAmount: (data.totalAmount || data.total || data.amount || 0) as number,
+    status: (data.status || "pending") as OrderStatus,
+    paymentStatus: (data.paymentStatus || "pending") as PaymentStatus,
+    paymentMethod: (data.paymentMethod || "cash") as FirestoreOrder["paymentMethod"],
+    deliveryAddress,
+    paymentReceipt,
+    adminNotes: (data.adminNotes || data.notes) as string | undefined,
+    storeId: (data.storeId || data.appId) as string | undefined,
+    createdAt: mapTimestamp(data.createdAt),
+    updatedAt: mapTimestamp(data.updatedAt),
+    confirmedAt: mapTimestamp(data.confirmedAt),
+    deliveredAt: mapTimestamp(data.deliveredAt),
+  };
+}
+
+/** Fetch recent orders from a store's Firestore (one-time) */
+export async function fetchOrders(
+  db: Firestore,
+  maxResults = 100
+): Promise<FirestoreOrder[]> {
+  try {
+    const q = query(
+      collection(db, "orders"),
+      orderBy("createdAt", "desc"),
+      limit(maxResults)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(mapOrder);
+  } catch (e) {
+    console.error("fetchOrders:", e);
+    // Fallback: no orderBy (in case index not created yet)
+    try {
+      const snap = await getDocs(collection(db, "orders"));
+      const orders = snap.docs.map(mapOrder);
+      orders.sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
+      return orders.slice(0, maxResults);
+    } catch {
+      return [];
+    }
+  }
+}
+
+/** Subscribe to real-time order updates */
+export function subscribeToOrders(
+  db: Firestore,
+  onUpdate: (orders: FirestoreOrder[]) => void,
+  onError?: (err: Error) => void
+): Unsubscribe {
+  try {
+    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(100));
+    return onSnapshot(
+      q,
+      (snap) => onUpdate(snap.docs.map(mapOrder)),
+      (err) => {
+        console.warn("subscribeToOrders error, falling back to unordered:", err);
+        // Fallback without orderBy
+        const unsub = onSnapshot(
+          collection(db, "orders"),
+          (snap) => {
+            const orders = snap.docs.map(mapOrder);
+            orders.sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
+            onUpdate(orders);
+          },
+          onError
+        );
+        return unsub;
+      }
+    );
+  } catch (e) {
+    console.error("subscribeToOrders:", e);
+    return () => {};
+  }
+}
+
+/** Update order status */
+export async function updateOrderStatus(
+  db: Firestore,
+  orderId: string,
+  status: OrderStatus,
+  adminNotes?: string
+): Promise<void> {
+  const ref = doc(db, "orders", orderId);
+  const update: Record<string, unknown> = {
+    status,
+    updatedAt: Timestamp.now(),
+  };
+  if (status === "confirmed") update.confirmedAt = Timestamp.now();
+  if (status === "delivered") update.deliveredAt = Timestamp.now();
+  if (adminNotes !== undefined) update.adminNotes = adminNotes;
+  await updateDoc(ref, update);
+}
+
+/** Verify or reject payment */
+export async function updatePaymentStatus(
+  db: Firestore,
+  orderId: string,
+  paymentStatus: PaymentStatus,
+  adminNotes?: string
+): Promise<void> {
+  const ref = doc(db, "orders", orderId);
+  const update: Record<string, unknown> = {
+    paymentStatus,
+    updatedAt: Timestamp.now(),
+  };
+  if (adminNotes !== undefined) update.adminNotes = adminNotes;
+  await updateDoc(ref, update);
 }
 
 // ─── Legacy exports (keep for backward compat during migration) ───────────────
