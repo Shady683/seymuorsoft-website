@@ -12,7 +12,7 @@ import {
 } from "@/lib/firestore";
 import OrdersDashboard from "@/components/dashboard/OrdersDashboard";
 
-type DashTab = "overview" | "orders" | "stores";
+type DashTab = "overview" | "orders" | "stores" | "website";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -66,6 +66,7 @@ export default function DashboardPage() {
     { id: "overview", icon: "📊", label: "نظرة عامة" },
     { id: "orders",   icon: "🛒", label: "الطلبات", badge: stats.pendingOrders || undefined },
     { id: "stores",   icon: "🏪", label: "المتاجر" },
+    { id: "website",  icon: "✏️", label: "الموقع" },
   ];
 
   return (
@@ -171,6 +172,24 @@ export default function DashboardPage() {
 
       {tab === "orders" && (
         <OrdersDashboard db={giftxDb} storeLabel="Gift X" />
+      )}
+
+      {tab === "website" && (
+        <div style={{ padding: "20px 16px", maxWidth: 700, margin: "0 auto" }}>
+          <h2 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 800, color: "#1E293B" }}>تعديل الموقع</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <a href="/dashboard/homepage" style={{ background: "white", borderRadius: 16, padding: "18px 20px", border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center", textDecoration: "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 42, height: 42, background: "#EEF2FF", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🏠</div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "#1E293B" }}>الصفحة الرئيسية</div>
+                  <div style={{ fontSize: 11, color: "#94A3B8" }}>Hero، الخدمات، الأرقام والنصوص</div>
+                </div>
+              </div>
+              <span style={{ color: "#4A6CF7", fontSize: 18 }}>←</span>
+            </a>
+          </div>
+        </div>
       )}
 
       {tab === "stores" && (

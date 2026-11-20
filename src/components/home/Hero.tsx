@@ -1,6 +1,15 @@
+"use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getSiteConfig, HeroConfig, DEFAULT_CONFIG } from "@/lib/siteConfig";
 
 export default function Hero() {
+  const [hero, setHero] = useState<HeroConfig>(DEFAULT_CONFIG.hero);
+
+  useEffect(() => {
+    getSiteConfig().then(c => setHero(c.hero));
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
       {/* Background */}
@@ -11,19 +20,21 @@ export default function Hero() {
       <div className="relative max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* Text */}
         <div>
-          <div className="inline-flex items-center gap-2 bg-primary-bg border border-primary/20 rounded-full px-4 py-1.5 mb-6">
-            <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-            <span className="text-primary text-sm font-700">متاح للمشاريع الجديدة</span>
-          </div>
+          {hero.available && (
+            <div className="inline-flex items-center gap-2 bg-primary-bg border border-primary/20 rounded-full px-4 py-1.5 mb-6">
+              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <span className="text-primary text-sm font-700">متاح للمشاريع الجديدة</span>
+            </div>
+          )}
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-heading leading-tight mb-6">
-            نبني لك تطبيق
-            <span className="text-primary block">يشتغل لوحده</span>
+            {hero.tagline}
+            <span className="text-primary block">{hero.highlight}</span>
             ويكبر معاك 🚀
           </h1>
 
           <p className="text-lg text-muted leading-relaxed mb-8 max-w-lg">
-            من تطبيقات الموبايل لأنظمة إدارة المحلات — بنصمم ونبرمج ونسلم مشاريع تقنية متكاملة بسرعة واحترافية.
+            {hero.description}
           </p>
 
           <div className="flex flex-wrap gap-3">
@@ -31,25 +42,21 @@ export default function Hero() {
               href="/wizard"
               className="flex items-center gap-2 bg-primary text-white px-6 py-3.5 rounded-2xl font-800 text-base shadow-primary hover:bg-primary-dark transition-all hover:-translate-y-0.5"
             >
-              ابدأ مشروعك الآن
+              {hero.cta_primary}
               <span className="text-lg">←</span>
             </Link>
             <a
               href="#portfolio"
               className="flex items-center gap-2 bg-white text-heading px-6 py-3.5 rounded-2xl font-700 text-base border border-border shadow-card hover:shadow-card-hover transition-all hover:-translate-y-0.5"
             >
-              شوف أعمالنا
+              {hero.cta_secondary}
               <span>👇</span>
             </a>
           </div>
 
           {/* Stats */}
           <div className="flex flex-wrap gap-8 mt-12 pt-8 border-t border-border">
-            {[
-              { n: "10+",  label: "مشروع منجز" },
-              { n: "5★",   label: "تقييم العملاء" },
-              { n: "100%", label: "دعم بعد التسليم" },
-            ].map((s) => (
+            {hero.stats.map((s) => (
               <div key={s.n}>
                 <div className="text-2xl font-900 text-primary">{s.n}</div>
                 <div className="text-sm text-muted mt-0.5">{s.label}</div>
@@ -60,7 +67,6 @@ export default function Hero() {
 
         {/* Visual card */}
         <div className="relative hidden lg:flex flex-col gap-4">
-          {/* Main mockup card */}
           <div className="bg-white rounded-3xl p-6 shadow-card-hover border border-border">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -85,8 +91,6 @@ export default function Hero() {
               اطلب دلوقتي 🛒
             </div>
           </div>
-
-          {/* Floating tags */}
           <div className="absolute -top-4 -left-4 bg-white rounded-2xl px-4 py-2.5 shadow-card border border-border flex items-center gap-2">
             <span className="text-lg">⚡</span>
             <div>

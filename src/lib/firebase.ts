@@ -2,6 +2,19 @@
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
+// ── Seymosoft Website Firebase (site config + auth) ──────────────────────────
+const siteApp = getApps().find(a => a.name === "site") || initializeApp({
+  apiKey: "AIzaSyDSVGKnix7hO7cHw3SWbU7uHl6ux7gVrN0",
+  authDomain: "seymoursoft-website.firebaseapp.com",
+  projectId: "seymoursoft-website",
+  storageBucket: "seymoursoft-website.firebasestorage.app",
+  messagingSenderId: "161984577863",
+  appId: "1:161984577863:web:f6f332d1a56bcb8c624c62",
+}, "site");
+
+export const siteDb   = getFirestore(siteApp);
+export const siteAuth = getAuth(siteApp);
+
 const giftxApp = getApps().find(a => a.name === "giftx") || initializeApp({
   apiKey: process.env.NEXT_PUBLIC_GIFTX_API_KEY,
   authDomain: "toy-x-app.firebaseapp.com",
