@@ -1,4 +1,4 @@
-﻿import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection } from "firebase/firestore";
 import { giftxDb, karellaDb } from "./firebase";
 import type { Product } from "./types";
 
@@ -23,7 +23,7 @@ function mapProduct(d: { id: string; data(): Record<string, unknown> }, catMap: 
     description: getName(data.description) || undefined,
     price: (data.offerPrice as number) || (data.regularPrice as number) || (data.price as number) || 0,
     regularPrice: (data.regularPrice as number) || undefined,
-    category: catMap[data.categoryId as string] || getName(data.category) || getName(data.categoryName) || "الكل",
+    category: catMap[data.categoryId as string] || getName(data.category) || getName(data.categoryName) || "????",
     emoji,
     imageUrl: Array.isArray(data.imageUrls) ? ((data.imageUrls[0] as string) || null) : ((data.imageUrl as string) || null),
     badge: data.badge as string,
@@ -55,30 +55,30 @@ export async function fetchGiftArtsProducts(): Promise<Product[]> {
     const [catSnap, snap] = await Promise.all([getDocs(collection(giftxDb, "gift_categories")), getDocs(collection(giftxDb, "gift_products"))]);
     const catMap: Record<string, string> = {};
     catSnap.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
-    return snap.docs.filter(d => isActive(d.data())).map(d => mapProduct(d, catMap, "🎁")).filter(p => p.name);
+    return snap.docs.filter(d => isActive(d.data())).map(d => mapProduct(d, catMap, "??")).filter(p => p.name);
   } catch (e) { console.error("fetchGiftArtsProducts:", e); return []; }
 }
 export async function fetchGiftArtsCategories(): Promise<string[]> {
   try {
     const snap = await getDocs(collection(giftxDb, "gift_categories"));
     const names = snap.docs.filter(d => isActive(d.data())).sort((a, b) => ((a.data().order as number) || 0) - ((b.data().order as number) || 0)).map(d => getName(d.data().name)).filter(Boolean);
-    return ["الكل", ...names];
-  } catch { return ["الكل"]; }
+    return ["????", ...names];
+  } catch { return ["????"]; }
 }
 export async function fetchToysXProducts(): Promise<Product[]> {
   try {
     const [catSnap, snap] = await Promise.all([getDocs(collection(giftxDb, "categories")), getDocs(collection(giftxDb, "products"))]);
     const catMap: Record<string, string> = {};
     catSnap.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
-    return snap.docs.filter(d => isActive(d.data())).map(d => mapProduct(d, catMap, "🚗")).filter(p => p.name);
+    return snap.docs.filter(d => isActive(d.data())).map(d => mapProduct(d, catMap, "??")).filter(p => p.name);
   } catch (e) { console.error("fetchToysXProducts:", e); return []; }
 }
 export async function fetchToysXCategories(): Promise<string[]> {
   try {
     const snap = await getDocs(collection(giftxDb, "categories"));
     const names = snap.docs.filter(d => isActive(d.data())).sort((a, b) => ((a.data().order as number) || 0) - ((b.data().order as number) || 0)).map(d => getName(d.data().name)).filter(Boolean);
-    return ["الكل", ...names];
-  } catch { return ["الكل"]; }
+    return ["????", ...names];
+  } catch { return ["????"]; }
 }
 export async function fetchKarellaProducts(): Promise<Product[]> {
   try {
@@ -86,13 +86,13 @@ export async function fetchKarellaProducts(): Promise<Product[]> {
     const catMap: Record<string, string> = {};
     catSnap.docs.forEach(d => { catMap[d.id] = getName(d.data().name); });
     const snap = await getDocs(collection(karellaDb, "products"));
-    return snap.docs.filter(d => d.data().isActive !== false).map(d => mapProduct(d, catMap, "👗")).filter(p => p.name);
+    return snap.docs.filter(d => d.data().isActive !== false).map(d => mapProduct(d, catMap, "??")).filter(p => p.name);
   } catch (e) { console.error("fetchKarellaProducts:", e); return []; }
 }
 export async function fetchKarellaCategories(): Promise<string[]> {
   try {
     const snap = await getDocs(collection(karellaDb, "categories"));
     const names = snap.docs.filter(d => d.data().isActive !== false).sort((a, b) => ((a.data().order as number) || 0) - ((b.data().order as number) || 0)).map(d => getName(d.data().name)).filter(Boolean);
-    return ["الكل", ...names];
-  } catch { return ["الكل"]; }
+    return ["????", ...names];
+  } catch { return ["????"]; }
 }
