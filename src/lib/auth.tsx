@@ -3,25 +3,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import {
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  GoogleAuthProvider,
   User,
 } from "firebase/auth";
-import { giftxAuth } from "./firebase";
-
-// ─── Admin emails — أضيف إيميلك وإيميلات أصحاب المحلات هنا ─────────────────
-// الـ Super Admin (أنت): تحكم كامل في كل المتاجر
-// Store Admin: يشوف بس المتجر بتاعه
-
-export const SUPER_ADMINS = [
-  "sheko.1983sh@gmail.com", // شادي — Super Admin
-];
-
-export const STORE_ADMINS: Record<string, string[]> = {
-  giftx:   ["sheko.1983sh@gmail.com"], // أضيف إيميل صاحب Gift X هنا
-  karella: ["sheko.1983sh@gmail.com"], // أضيف إيميل صاحب Karella هنا
-};
+import { doc, getDoc } from "firebase/firestore";
+import { giftxAuth, giftxDb } from "./firebase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,7 +26,7 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   isSuperAdmin: boolean;
@@ -50,7 +37,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
-  signInWithGoogle: async () => {},
+  signInWithEmail: async () => null,
   signOut: async () => {},
   isAdmin: false,
   isSuperAdmin: false,
@@ -60,56 +47,74 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-// ─── Helper: map Firebase user → AuthUser ────────────────────────────────────
+// ─── Helper: map Firebase user → AuthUser via Firestore ──────────────────────
 
-function mapUser(firebaseUser: User): AuthUser {
+async function mapUser(firebaseUser: User): Promise<AuthUser> {
   const email = firebaseUser.email ?? "";
 
-  const isSuperAdmin = SUPER_ADMINS.includes(email);
+  // جيب صلاحيات الـ user من Firestore
+  try {
+    const adminDoc = await getDoc(doc(giftxDb, "admins", firebaseUser.uid));
+    if (adminDoc.exists()) {
+      const data = adminDoc.data();
+      const role: UserRole = data.role ?? "customer";
+      const adminStores: string[] = data.stores ?? [];
+      return {
+        uid: firebaseUser.uid,
+        email,
+        displayName: firebaseUser.displayName ?? data.name ?? null,
+        photoURL: firebaseUser.photoURL,
+        role,
+        adminStores,
+      };
+    }
+  } catch (e) {
+    console.error("Error fetching admin doc:", e);
+  }
 
-  const adminStores = isSuperAdmin
-    ? Object.keys(STORE_ADMINS) // Super admin يتحكم في كل المتاجر
-    : Object.entries(STORE_ADMINS)
-        .filter(([, emails]) => emails.includes(email))
-        .map(([storeId]) => storeId);
-
-  const role: UserRole = isSuperAdmin
-    ? "super_admin"
-    : adminStores.length > 0
-    ? "store_admin"
-    : "customer";
-
+  // مفيش doc → customer عادي
   return {
     uid: firebaseUser.uid,
     email,
     displayName: firebaseUser.displayName,
     photoURL: firebaseUser.photoURL,
-    role,
-    adminStores,
+    role: "customer",
+    adminStores: [],
   };
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
-
-const googleProvider = new GoogleAuthProvider();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(giftxAuth, (firebaseUser) => {
-      setUser(firebaseUser ? mapUser(firebaseUser) : null);
+    const unsub = onAuthStateChanged(giftxAuth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const mapped = await mapUser(firebaseUser);
+        setUser(mapped);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
     return unsub;
   }, []);
 
-  async function signInWithGoogle() {
+  async function signInWithEmail(email: string, password: string): Promise<string | null> {
     try {
-      await signInWithPopup(giftxAuth, googleProvider);
-    } catch (e) {
-      console.error("Google sign-in error:", e);
+      await signInWithEmailAndPassword(giftxAuth, email, password);
+      return null; // نجح
+    } catch (e: unknown) {
+      const code = (e as { code?: string }).code ?? "";
+      if (code === "auth/user-not-found" || code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        return "الإيميل أو كلمة المرور غلط";
+      }
+      if (code === "auth/too-many-requests") {
+        return "تم تعطيل الحساب مؤقتاً — جرب بعد قليل";
+      }
+      return "حدث خطأ — جرب مرة تانية";
     }
   }
 
@@ -121,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSuperAdmin = !!user && user.role === "super_admin";
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, isAdmin, isSuperAdmin }}>
+    <AuthContext.Provider value={{ user, loading, signInWithEmail, signOut, isAdmin, isSuperAdmin }}>
       {children}
     </AuthContext.Provider>
   );
