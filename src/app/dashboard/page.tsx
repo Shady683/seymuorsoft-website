@@ -51,7 +51,7 @@ export default function DashboardPage() {
     })();
   }, [authUser, authLoading, isAdmin]);
 
-  if (authLoading || statsLoading) {
+  if (authLoading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC" }}>
         <div style={{ textAlign: "center" }}>
@@ -131,6 +131,7 @@ export default function DashboardPage() {
           <h2 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 800, color: "#1E293B" }}>نظرة عامة</h2>
 
           {/* Stats Grid */}
+          {statsLoading && <div style={{ textAlign: "center", padding: "20px 0", color: "#94A3B8", fontSize: 13 }}>⏳ جاري تحميل الإحصائيات...</div>}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 20 }}>
             {[
               { label: "Gift X — هدايا",   value: stats.giftArts,      sub: `${stats.giftCats} فئة`,        color: "#F97316", emoji: "🎁", bg: "#FFF7ED" },
