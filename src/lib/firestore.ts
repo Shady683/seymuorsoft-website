@@ -1,4 +1,4 @@
-import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection, doc, getDoc } from "firebase/firestore";
 import { giftxDb, karellaDb } from "./firebase";
 import type { Product } from "./types";
 
