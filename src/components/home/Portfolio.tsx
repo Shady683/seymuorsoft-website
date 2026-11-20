@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import Image from "next/image";
 
 // ── بلاطات خاصة لكل متجر ──────────────────────────────────────────────────────
 
@@ -24,14 +25,12 @@ function GiftXCard() {
         <div className="flex items-start justify-between mb-5">
           {/* لوجو */}
           <div style={{
-            width: 64, height: 64, borderRadius: 18,
-            background: "linear-gradient(135deg, #1a1200, #0a0a0a)",
+            width: 72, height: 72, borderRadius: 18,
+            overflow: "hidden",
             border: "1.5px solid #c9922a",
-            display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 4px 20px rgba(201,146,42,0.3)",
-            fontSize: 32,
           }}>
-            🎁
+            <Image src="/logos/giftx-logo.png" alt="Gift X" width={72} height={72} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
           </div>
 
           <div className="flex items-center gap-2">
@@ -97,15 +96,15 @@ function KarellaCard() {
     <div
       className="rounded-3xl overflow-hidden relative hover:-translate-y-1 transition-all duration-300"
       style={{
-        background: "linear-gradient(135deg, #0d0510 0%, #1a0a2e 50%, #0d0510 100%)",
-        border: "1px solid #9d4edd",
-        boxShadow: "0 0 40px rgba(157,78,221,0.15), inset 0 1px 0 rgba(220,160,255,0.08)",
+        background: "linear-gradient(135deg, #0e1a0e 0%, #1a2e14 50%, #0e1a0e 100%)",
+        border: "1px solid #c9a227",
+        boxShadow: "0 0 40px rgba(144,196,100,0.1), inset 0 1px 0 rgba(201,162,39,0.1)",
       }}
     >
       {/* خلفية بريق */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse at 70% 20%, rgba(157,78,221,0.1) 0%, transparent 60%)",
+        background: "radial-gradient(ellipse at 70% 20%, rgba(144,196,100,0.07) 0%, transparent 60%)",
         pointerEvents: "none",
       }} />
 
@@ -113,14 +112,12 @@ function KarellaCard() {
         {/* هيدر */}
         <div className="flex items-start justify-between mb-5">
           <div style={{
-            width: 64, height: 64, borderRadius: 18,
-            background: "linear-gradient(135deg, #1a0a2e, #0d0510)",
-            border: "1.5px solid #9d4edd",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 20px rgba(157,78,221,0.35)",
-            fontSize: 32,
+            width: 72, height: 72, borderRadius: 18,
+            overflow: "hidden",
+            border: "1.5px solid #c9a227",
+            boxShadow: "0 4px 20px rgba(201,162,39,0.35)",
           }}>
-            👗
+            <Image src="/logos/karella-logo.jpg" alt="Karella" width={72} height={72} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
           </div>
 
           <div className="flex items-center gap-2">
@@ -129,10 +126,10 @@ function KarellaCard() {
               style={{
                 fontSize: 12, fontWeight: 700,
                 padding: "6px 14px", borderRadius: 100,
-                background: "linear-gradient(135deg, #9d4edd, #c77dff)",
-                color: "white",
+                background: "linear-gradient(135deg, #c9a227, #e8c84a)",
+                color: "#0e1a0e",
                 textDecoration: "none",
-                boxShadow: "0 2px 12px rgba(157,78,221,0.4)",
+                boxShadow: "0 2px 12px rgba(201,162,39,0.4)",
               }}
             >
               شوف المتجر ←
@@ -145,18 +142,18 @@ function KarellaCard() {
           display: "inline-block",
           fontSize: 11, fontWeight: 700,
           padding: "4px 12px", borderRadius: 100,
-          background: "rgba(157,78,221,0.15)",
-          color: "#c77dff",
-          border: "1px solid rgba(157,78,221,0.3)",
+          background: "rgba(144,196,100,0.12)",
+          color: "#b5e28a",
+          border: "1px solid rgba(144,196,100,0.25)",
           marginBottom: 10,
         }}>
           بوتيك أزياء
         </div>
 
         <h3 style={{ fontSize: 24, fontWeight: 900, color: "white", margin: "0 0 4px" }}>
-          Kare<span style={{ color: "#c77dff" }}>lla</span>
+          Kare<span style={{ color: "#e8c84a" }}>lla</span>
         </h3>
-        <p style={{ fontSize: 11, color: "#9d4edd", fontWeight: 600, margin: "0 0 10px", letterSpacing: 1 }}>
+        <p style={{ fontSize: 11, color: "#c9a227", fontWeight: 600, margin: "0 0 10px", letterSpacing: 1 }}>
           ELEGANT FASHION BOUTIQUE
         </p>
         <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.6, margin: "0 0 16px" }}>
@@ -168,9 +165,9 @@ function KarellaCard() {
             <span key={t} style={{
               fontSize: 11, fontWeight: 600,
               padding: "4px 10px", borderRadius: 100,
-              background: "rgba(157,78,221,0.1)",
-              color: "#9d4edd",
-              border: "1px solid rgba(157,78,221,0.25)",
+              background: "rgba(144,196,100,0.08)",
+              color: "#b5e28a",
+              border: "1px solid rgba(144,196,100,0.2)",
             }}>{t}</span>
           ))}
         </div>
