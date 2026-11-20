@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from "next";
-import StoreLayout from "@/components/stores/StoreLayout";
-import { fetchGiftXProducts, fetchGiftXCategories } from "@/lib/firestore";
+import TwoSectionStoreLayout from "@/components/stores/TwoSectionStoreLayout";
+import { fetchGiftArtsProducts, fetchGiftArtsCategories, fetchToysXProducts, fetchToysXCategories } from "@/lib/firestore";
 
 export const metadata: Metadata = {
   title: "Gift X — ألعاب وهدايا مميزة",
@@ -8,20 +8,40 @@ export const metadata: Metadata = {
 };
 
 export default async function GiftXPage() {
-  const [products, categories] = await Promise.all([
-    fetchGiftXProducts(),
-    fetchGiftXCategories(),
+  const [giftArtsProducts, giftArtsCategories, toysXProducts, toysXCategories] = await Promise.all([
+    fetchGiftArtsProducts(),
+    fetchGiftArtsCategories(),
+    fetchToysXProducts(),
+    fetchToysXCategories(),
   ]);
+
   return (
-    <StoreLayout
+    <TwoSectionStoreLayout
       storeName="Gift X"
       storeDesc="ألعاب، هدايا، وإكسسوارات مختارة بعناية بأسعار تنافسية وتوصيل سريع"
       emoji="🎁"
       primaryColor="#F97316"
-      secondaryColor="#EAB308"
       primaryBg="#FFF7ED"
-      categories={categories}
-      products={products}
+      sections={[
+        {
+          id: "giftarts",
+          name: "Gift X",
+          subtitle: "Gift Arts",
+          emoji: "🎁",
+          sectionColor: "#F97316",
+          categories: giftArtsCategories,
+          products: giftArtsProducts,
+        },
+        {
+          id: "toysx",
+          name: "Toys X",
+          subtitle: "Children\'s Dreams",
+          emoji: "🚗",
+          sectionColor: "#EF4444",
+          categories: toysXCategories,
+          products: toysXProducts,
+        },
+      ]}
     />
   );
 }
