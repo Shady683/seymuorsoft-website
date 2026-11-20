@@ -1,4 +1,6 @@
-﻿export interface Product {
+﻿export type DashboardNav = "overview" | "products" | "orders";
+
+export interface Product {
   id: string;
   name: string;
   description?: string;
