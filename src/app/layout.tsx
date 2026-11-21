@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
+import ThemeLoader from "@/components/ThemeLoader";
 
 export const metadata: Metadata = {
   title: "Seymour Soft Solution | حلول برمجية متكاملة",
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ar" dir="rtl">
       <body>
         <AuthProvider>
+          <ThemeLoader />
           {children}
         </AuthProvider>
       </body>

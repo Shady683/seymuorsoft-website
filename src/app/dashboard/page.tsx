@@ -189,6 +189,16 @@ export default function DashboardPage() {
               </div>
               <span style={{ color: "#4A6CF7", fontSize: 18 }}>←</span>
             </a>
+            <a href="/dashboard/theme" style={{ background: "white", borderRadius: 16, padding: "18px 20px", border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center", textDecoration: "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 42, height: 42, background: "#FFF7ED", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🎨</div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "#1E293B" }}>الثيم والتصميم</div>
+                  <div style={{ fontSize: 11, color: "#94A3B8" }}>ألوان، خطوط، أحجام، استدارة</div>
+                </div>
+              </div>
+              <span style={{ color: "#4A6CF7", fontSize: 18 }}>←</span>
+            </a>
           </div>
         </div>
       )}
