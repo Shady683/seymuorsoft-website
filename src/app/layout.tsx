@@ -2,6 +2,7 @@
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import ThemeLoader from "@/components/ThemeLoader";
+import EditorWrapper from "@/components/editor/EditorWrapper";
 
 export const metadata: Metadata = {
   title: "Seymour Soft Solution | حلول برمجية متكاملة",
@@ -16,7 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthProvider>
           <ThemeLoader />
-          {children}
+          <EditorWrapper>
+            {children}
+          </EditorWrapper>
         </AuthProvider>
       </body>
     </html>

@@ -7,6 +7,14 @@ export default function Services() {
 
   useEffect(() => {
     getSiteConfig().then(c => setCfg(c.services));
+
+    // Live update من الـ Editor Panel
+    const handler = (e: Event) => {
+      const full = (e as CustomEvent).detail;
+      if (full?.services) setCfg(full.services);
+    };
+    window.addEventListener("siteConfigUpdated", handler);
+    return () => window.removeEventListener("siteConfigUpdated", handler);
   }, []);
 
   return (

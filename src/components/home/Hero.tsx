@@ -8,6 +8,14 @@ export default function Hero() {
 
   useEffect(() => {
     getSiteConfig().then(c => setHero(c.hero));
+
+    // Live update من الـ Editor Panel
+    const handler = (e: Event) => {
+      const full = (e as CustomEvent).detail;
+      if (full?.hero) setHero(full.hero);
+    };
+    window.addEventListener("siteConfigUpdated", handler);
+    return () => window.removeEventListener("siteConfigUpdated", handler);
   }, []);
 
   return (

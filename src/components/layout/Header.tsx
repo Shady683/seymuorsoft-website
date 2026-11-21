@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useEditor } from "@/components/editor/EditorContext";
 
 const navLinks = [
   { href: "/#services", label: "خدماتنا" },
@@ -21,7 +22,9 @@ export default function Header() {
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const { user, loading, signInWithEmail, signOut, isAdmin } = useAuth();
+  const { openEditor } = useEditor();
   const router = useRouter();
+  const isSuperAdmin = user?.role === "super_admin";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -118,6 +121,14 @@ export default function Header() {
                         {user.role === "super_admin" ? "⭐ Super Admin" : user.role === "store_admin" ? "🏪 صاحب متجر" : "👤 عميل"}
                       </div>
                     </div>
+                    {isSuperAdmin && (
+                      <button
+                        onClick={() => { openEditor(); setUserMenuOpen(false); }}
+                        style={{ width: "100%", padding: "9px 12px", textAlign: "right", background: "#F0FDF4", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#10B981", marginBottom: 4 }}
+                      >
+                        🎛️ تعديل الموقع
+                      </button>
+                    )}
                     {isAdmin && (
                       <button
                         onClick={() => { router.push("/dashboard"); setUserMenuOpen(false); }}
