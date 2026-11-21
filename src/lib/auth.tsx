@@ -8,7 +8,7 @@ import {
   User,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { giftxAuth, giftxDb } from "./firebase";
+import { siteAuth, siteDb } from "./firebase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ async function mapUser(firebaseUser: User): Promise<AuthUser> {
 
   // جيب صلاحيات الـ user من Firestore
   try {
-    const adminDoc = await getDoc(doc(giftxDb, "admins", firebaseUser.uid));
+    const adminDoc = await getDoc(doc(siteDb, "admins", firebaseUser.uid));
     if (adminDoc.exists()) {
       const data = adminDoc.data();
       const role: UserRole = data.role ?? "customer";
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(giftxAuth, async (firebaseUser) => {
+    const unsub = onAuthStateChanged(siteAuth, async (firebaseUser) => {
       if (firebaseUser) {
         const mapped = await mapUser(firebaseUser);
         setUser(mapped);
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signInWithEmail(email: string, password: string): Promise<string | null> {
     try {
-      await signInWithEmailAndPassword(giftxAuth, email, password);
+      await signInWithEmailAndPassword(siteAuth, email, password);
       return null; // نجح
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? "";
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    await firebaseSignOut(giftxAuth);
+    await firebaseSignOut(siteAuth);
   }
 
   const isAdmin = !!user && user.role !== "customer";
