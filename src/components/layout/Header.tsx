@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
 const navLinks = [
-  { href: "#services", label: "خدماتنا" },
-  { href: "#portfolio", label: "أعمالنا" },
-  { href: "#contact",  label: "تواصل معنا" },
+  { href: "/#services", label: "خدماتنا" },
+  { href: "/portfolio", label: "أعمالنا" },
+  { href: "/#contact",  label: "تواصل معنا" },
 ];
 
 export default function Header() {
